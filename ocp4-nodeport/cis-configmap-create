@@ -1,0 +1,26 @@
+#!/bin/bash
+# https://clouddocs.f5.com/training/community/containers/html/class2/module1/lab1.html
+tmsh create auth partition okd
+
+#create kubernetes bigip container connecter w/ nodeport, authentication and RBAC
+oc create secret generic bigip-login -n kube-system --from-literal=username=admin --from-literal=password=bigip123
+#oc create serviceaccount bigip-ctlr -n kube-system
+#oc create -f f5-kctlr-openshift-clusterrole.yaml
+oc create serviceaccount k8s-bigip-ctlr -n kube-system
+oc create clusterrolebinding k8s-bigip-ctlr-clusteradmin --clusterrole=cluster-admin --serviceaccount=kube-system:k8s-bigip-ctlr
+oc create -f myf5-hello-world-deployment.yaml
+
+# NodePort for ConfigMap
+# you have to label the service?
+oc create -f nodeport-service-hello-world.yaml
+oc create -f configmap-hello-world.yaml
+
+
+#When using AS3 an extra step needs to be performed. 
+#In addition to deleting the application configmap, a “blank AS3 declaration” is required to completely remove the application from BIG-IP.
+oc delete -f configmap-hello-world.yaml
+oc delete -f nodeport-service-hello-world.yaml
+oc delete -f deployment-hello-world.yaml
+
+oc create -f delete-hello-world.yaml
+oc delete -f delete-hello-world.yaml

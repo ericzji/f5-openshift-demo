@@ -1,0 +1,63 @@
+##################################################################################################
+# Productpage services
+##################################################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productpage-v1
+  labels:
+    app: productpage
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productpage
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: productpage
+        version: v1
+    spec:
+      serviceAccountName: bookinfo-productpage
+      containers:
+      - name: productpage
+        image: istio/examples-bookinfo-productpage-v1:0.5.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: productpage
+  labels:
+    app: productpage
+    service: productpage
+    cis.f5.com/as3-tenant: AS3
+    cis.f5.com/as3-app: productpage
+    cis.f5.com/as3-pool: productpage_pool
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: productpage
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bookinfo-productpage
+---
+## Route Configurations
+apiVersion: v1
+kind: Route
+metadata: 
+  name: bookinfo-route
+spec:
+  host: app1.thebizdevops.net
+  to:
+    kind: Service
+    name: productpage
+---

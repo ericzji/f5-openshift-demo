@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#create kubernetes bigip container connecter w/ nodeport, authentication and RBAC
+oc create secret generic bigip-login -n kube-system --from-literal=username=admin --from-literal=password=bigip123
+oc create serviceaccount k8s-bigip-ctlr -n kube-system
+oc create clusterrolebinding k8s-bigip-ctlr-clusteradmin --clusterrole=cluster-admin --serviceaccount=kube-system:k8s-bigip-ctlr
+### Problem with using f5-kctlr-openshift-clusterrole.yaml
+# oc create serviceaccount bigip-ctlr -n kube-system
+# oc create -f f5-kctlr-openshift-clusterrole.yaml
+
+# using service  account: k8s-bigip-ctlr 
+oc create -f f5-cluster-deployment.yaml
+
+

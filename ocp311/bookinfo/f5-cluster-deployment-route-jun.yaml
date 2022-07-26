@@ -1,0 +1,44 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: k8s-bigip-ctlr
+  namespace: kube-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: k8s-bigip-ctlr
+      labels:
+        app: k8s-bigip-ctlr
+    spec:
+      serviceAccountName: k8s-bigip-ctlr
+      containers:
+        - name: k8s-bigip-ctlr
+          image: "f5networks/k8s-bigip-ctlr:latest"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: BIGIP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: bigip-login-jun
+                  key: username
+            - name: BIGIP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bigip-login-jun
+                  key: password
+          command: ["/app/bin/k8s-bigip-ctlr"]
+          args: [
+            "--bigip-username=$(BIGIP_USERNAME)",
+            "--bigip-password=$(BIGIP_PASSWORD)",
+            "--bigip-url=10.69.32.29",
+            "--bigip-partition=okd311",
+            "--namespace=f5-hello-world",
+            "--namespace=f5-demo-app",
+            "--pool-member-type=cluster",
+            "--manage-routes=true",
+	    "--route-vserver-addr=10.69.32.130",
+            "--route-http-vserver=ocp-http-dc1",
+            "--route-https-vserver=ocp-httpis-dc1",
+            "--openshift-sdn-name=/Common/okd311_tunnel",
+          ]
