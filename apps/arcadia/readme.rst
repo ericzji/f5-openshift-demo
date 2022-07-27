@@ -47,6 +47,7 @@ Click on Login
 Login with matt:ilovef5
 
 You should see all the apps running (main, back, app2 and app3)
+
 .. image:: ./lab1/arcadia-app1.png
    :align: center
    :scale: 50%
